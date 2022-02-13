@@ -45,14 +45,14 @@ class Player{
 		//rect(cmx, camy, 10, 10);
 		//rect(cmx+Math.cos(dir-.68)*length, cmy+Math.sin(dir-.68)*length, 10, 10);
 		//rect(cmx+Math.cos(dir+.68)*length, cmy+Math.sin(dir+.68)*length, 10, 10);
-		console.log(Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz)));
+		//console.log(Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz)));
 		if(isInside(
 			cmx+Math.cos(dir-.68)*(length*2), cmy+Math.sin(dir-.68)*(length*2), 
 			cmx+Math.cos(dir+.68)*(length*2), cmy+Math.sin(dir+.68)*(length*2),
 			cmx, cmy, 
 	  	this.x, this.y)
-			&&
-			Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz*57.2957795))<60
+			//&&
+			//Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz*57.2957795))<60
 			){
 			ctx.fillStyle = "green";
 			
@@ -69,7 +69,7 @@ class Player{
 			//ctx.stroke();
 			ctx.font = "30px Arial";
 			//ctx.fillText(parseInt(this.distance), cmx, cmy);
-
+	
 
 			this.startx1 = cmx+Math.cos(dir+-0.5333)*this.distance;
 			this.startx2 = cmx+Math.cos(dir+0.5533)*this.distance
@@ -78,15 +78,30 @@ class Player{
 			this.myangle = getAnglePoints(this.x, this.y, cmx, cmy);;
 			this.block1angle = getAnglePoints(this.startx1, this.starty1, cmx, cmy);
 			this.block2angle = getAnglePoints(this.startx2, this.starty2, cmx, cmy);
-			//ctx.fillText(this.block1angle,  this.startx1, this.starty1);
-			//ctx.fillText(this.block1angle,this.startx2, this.starty2);
+
 			this.roundcircum = getAngleDifference(this.block1angle,this.block2angle)/57.2957795*this.distance;
 			this.roundcircumtothis = getAngleDifference(this.block1angle,this.myangle)/57.2957795*this.distance;
 			this.anglepercent = (this.roundcircumtothis/this.roundcircum);
 			//console.log(this.distance)
+			//*************************************************************
+
+			this.distancez = getDistance(this.x, this.z, cmx, cmz);
+			this.startx1 = cmx+Math.sin(dirz+-0.5333)*this.distancez;
+			this.startx2 = cmx+Math.sin(dirz+0.5533)*this.distancez
+			this.startz1 = cmz+Math.cos(dirz+-0.5333)*this.distancez;
+			this.startz2 = cmz+Math.cos(dirz+0.5533)*this.distancez;
+			this.myangle = getAnglePoints(this.x, this.z, cmx, cmz);
+			this.block1angle = getAnglePoints(this.startx1, this.startz1, cmx, cmz);
+			this.block2angle = getAnglePoints(this.startx2, this.startz2, cmx, cmz);
+
+			this.roundcircumz = getAngleDifference(this.block1angle,this.block2angle)/57.2957795*this.distancez;
+			this.roundcircumtothisz = getAngleDifference(this.block1angle,this.myangle)/57.2957795*this.distancez;
+			this.anglepercentz = (this.roundcircumz/this.roundcircumtothisz);
+
+			console.log(this.anglepercentz);			
 			ctx.fillStyle = this.color;
 			if((length-this.distance)/2>0){
-				rect(this.anglepercent*width, height/2+this.z-cmz, (length-this.distance)/2, (length-this.distance)/2);
+				rect(this.anglepercent*width, this.anglepercentz*height, (length-this.distance)/2, (length-this.distance)/2);
 			}
 			//console.log([this.anglepercent*width, height/2, 10, 10, this.anglepercent])
 			//rect(this.startx1, this.starty1, 10 , 10);
@@ -202,7 +217,7 @@ function createblock(){
 	  color += "0123456789ABCDEF"[Math.floor(Math.random() * 16)];
 	}
 	objects.push(
-		new Player(camx+Math.cos(camdir)*5, camy+Math.sin(camdir)*5, camz, color)
+		new Player(camx+Math.cos(camdir)*5, camy+Math.sin(camdir)*5, Math.cos(camdirz), color)
 	);
 }
 updateall();
