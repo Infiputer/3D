@@ -18,7 +18,8 @@ function moveMouse(e){
 	camdir += e.movementX/1000;
 	camdir = camdir%(2*Math.PI);
 
-	camdirz  += e.movementX/1000;
+	camdirz  += e.movementY/1000;
+	camdirz = camdirz%(2*Math.PI);
 }
 var ctx = canvas.getContext("2d");
 dir = 90;
@@ -36,20 +37,25 @@ class Player{
 		this.z = z;
 		this.color = color;
 	}
-	update(dir, cmx, cmy, cmz){
+	update(dir, dirz, cmx, cmy, cmz){
+		this.distance = getDistance(this.x, this.y, cmx, cmy);
 		this.diff = Math.abs(getAngleDifference(getAnglePoints(cmx, cmy, this.x, this.y), dir));
 		//console.log({diff:getAnglePoints(cmx, cmy, this.x, this.y), dir:dir});
 		ctx.fillStyle=(Math.random()<0.5)?"yellow":"orange";
 		//rect(cmx, camy, 10, 10);
 		//rect(cmx+Math.cos(dir-.68)*length, cmy+Math.sin(dir-.68)*length, 10, 10);
 		//rect(cmx+Math.cos(dir+.68)*length, cmy+Math.sin(dir+.68)*length, 10, 10);
+		console.log(Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz)));
 		if(isInside(
 			cmx+Math.cos(dir-.68)*(length*2), cmy+Math.sin(dir-.68)*(length*2), 
 			cmx+Math.cos(dir+.68)*(length*2), cmy+Math.sin(dir+.68)*(length*2),
 			cmx, cmy, 
-	  	this.x, this.y)){
+	  	this.x, this.y)
+			&&
+			Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz*57.2957795))<60
+			){
 			ctx.fillStyle = "green";
-			this.distance = getDistance(this.x, this.y, cmx, cmy);
+			
 			for (this.linedir = -0.5333; this.linedir < 0.5333; this.linedir+=0.1) {
 			//	ctx.beginPath();
 			//	ctx.moveTo(cmx+Math.cos(dir+this.linedir)*this.distance, cmy+Math.sin(dir+this.linedir)*this.distance);
@@ -143,7 +149,7 @@ function updateall(){
 	//ctx.lineTo(camx+Math.cos(camdir-120)*length, camy+Math.sin(camdir-120)*length);
 	//ctx.stroke();
 	for(i in objects){
-		objects[objects.length-i-1].update(camdir, camx, camy, camz);
+		objects[objects.length-i-1].update(camdir, camdirz, camx, camy, camz);
 	}
 	objects.sort((b, a) => parseFloat(b.distance) - parseFloat(a.distance));
 	ctx.beginPath()
