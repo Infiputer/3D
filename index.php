@@ -13,13 +13,13 @@ canvas.onclick=function(){
 	canvas.requestPointerLock();
 	document.addEventListener("mousemove", moveMouse, false);
 	createblock();
+	cancreateblock = true;
  };
 function moveMouse(e){
 	camdir += e.movementX/1000;
 	camdir = camdir%(2*Math.PI);
 
-	camdirz  += e.movementY/1000;
-	camdirz = camdirz%(2*Math.PI);
+	camdirz  += e.movementX/1000;
 }
 var ctx = canvas.getContext("2d");
 dir = 90;
@@ -29,33 +29,31 @@ camy=height/2;
 camz=0;
 camdir=0;
 camdirz = 0;
+cancreateblock=false;
 var camdir360 = 0;
 class Player{
-	constructor(x, y, z, color){
+	constructor(x, y, z, color, width, height){
 		this.x = x;
 		this.y = y;
 		this.z = z;
 		this.color = color;
+		this.width = width;
+		this.height = height;
 	}
-	update(dir, dirz, cmx, cmy, cmz){
-		this.distance = getDistance(this.x, this.y, cmx, cmy);
+	update(dir, cmx, cmy, cmz){
 		this.diff = Math.abs(getAngleDifference(getAnglePoints(cmx, cmy, this.x, this.y), dir));
 		//console.log({diff:getAnglePoints(cmx, cmy, this.x, this.y), dir:dir});
 		ctx.fillStyle=(Math.random()<0.5)?"yellow":"orange";
 		//rect(cmx, camy, 10, 10);
 		//rect(cmx+Math.cos(dir-.68)*length, cmy+Math.sin(dir-.68)*length, 10, 10);
 		//rect(cmx+Math.cos(dir+.68)*length, cmy+Math.sin(dir+.68)*length, 10, 10);
-		//console.log(Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz)));
 		if(isInside(
 			cmx+Math.cos(dir-.68)*(length*2), cmy+Math.sin(dir-.68)*(length*2), 
 			cmx+Math.cos(dir+.68)*(length*2), cmy+Math.sin(dir+.68)*(length*2),
 			cmx, cmy, 
-	  	this.x, this.y)
-			//&&
-			//Math.abs(getAngleDifference(getAnglePoints(cmx, cmz, this.x, this.z), dirz*57.2957795))<60
-			){
+	  	this.x, this.y)){
 			ctx.fillStyle = "green";
-			
+			this.distance = getDistance(this.x, this.y, cmx, cmy);
 			for (this.linedir = -0.5333; this.linedir < 0.5333; this.linedir+=0.1) {
 			//	ctx.beginPath();
 			//	ctx.moveTo(cmx+Math.cos(dir+this.linedir)*this.distance, cmy+Math.sin(dir+this.linedir)*this.distance);
@@ -69,7 +67,7 @@ class Player{
 			//ctx.stroke();
 			ctx.font = "30px Arial";
 			//ctx.fillText(parseInt(this.distance), cmx, cmy);
-	
+
 
 			this.startx1 = cmx+Math.cos(dir+-0.5333)*this.distance;
 			this.startx2 = cmx+Math.cos(dir+0.5533)*this.distance
@@ -78,34 +76,22 @@ class Player{
 			this.myangle = getAnglePoints(this.x, this.y, cmx, cmy);;
 			this.block1angle = getAnglePoints(this.startx1, this.starty1, cmx, cmy);
 			this.block2angle = getAnglePoints(this.startx2, this.starty2, cmx, cmy);
-
+			//ctx.fillText(this.block1angle,  this.startx1, this.starty1);
+			//ctx.fillText(this.block1angle,this.startx2, this.starty2);
 			this.roundcircum = getAngleDifference(this.block1angle,this.block2angle)/57.2957795*this.distance;
 			this.roundcircumtothis = getAngleDifference(this.block1angle,this.myangle)/57.2957795*this.distance;
 			this.anglepercent = (this.roundcircumtothis/this.roundcircum);
 			//console.log(this.distance)
-			//*************************************************************
-
-			this.distancez = getDistance(this.x, this.z, cmx, cmz);
-			this.startx1 = cmx+Math.sin(dirz+-0.5333)*this.distancez;
-			this.startx2 = cmx+Math.sin(dirz+0.5533)*this.distancez
-			this.startz1 = cmz+Math.cos(dirz+-0.5333)*this.distancez;
-			this.startz2 = cmz+Math.cos(dirz+0.5533)*this.distancez;
-			this.myangle = getAnglePoints(this.x, this.z, cmx, cmz);
-			this.block1angle = getAnglePoints(this.startx1, this.startz1, cmx, cmz);
-			this.block2angle = getAnglePoints(this.startx2, this.startz2, cmx, cmz);
-
-			this.roundcircumz = getAngleDifference(this.block1angle,this.block2angle)/57.2957795*this.distancez;
-			this.roundcircumtothisz = getAngleDifference(this.block1angle,this.myangle)/57.2957795*this.distancez;
-			this.anglepercentz = (this.roundcircumz/this.roundcircumtothisz);
-
-			console.log(this.anglepercentz);			
 			ctx.fillStyle = this.color;
 			if((length-this.distance)/2>0){
-				rect(this.anglepercent*width, this.anglepercentz*height, (length-this.distance)/2, (length-this.distance)/2);
+				rect(
+					this.anglepercent*width, 
+					height/2+this.z-cmz, 
+					this.width*(length-this.distance)/2, 
+					this.height*(length-this.distance)/2
+				);
 			}
-			//console.log([this.anglepercent*width, height/2, 10, 10, this.anglepercent])
-			//rect(this.startx1, this.starty1, 10 , 10);
-			//rect(this.startx2, this.starty2, 10, 10);
+
 			
 		
 	
@@ -164,7 +150,7 @@ function updateall(){
 	//ctx.lineTo(camx+Math.cos(camdir-120)*length, camy+Math.sin(camdir-120)*length);
 	//ctx.stroke();
 	for(i in objects){
-		objects[objects.length-i-1].update(camdir, camdirz, camx, camy, camz);
+		objects[objects.length-i-1].update(camdir, camx, camy, camz);
 	}
 	objects.sort((b, a) => parseFloat(b.distance) - parseFloat(a.distance));
 	ctx.beginPath()
@@ -212,17 +198,33 @@ document.onkeypress = function (eventKeyName) {
 
 }
 function createblock(){
+	if(!cancreateblock){return false;}
 	color = '#';
 	for (i = 0; i < 6; i++) {
 	  color += "0123456789ABCDEF"[Math.floor(Math.random() * 16)];
 	}
+	scale = Math.random();
 	objects.push(
-		new Player(camx+Math.cos(camdir)*5, camy+Math.sin(camdir)*5, Math.cos(camdirz), color)
+		new Player(camx+Math.cos(camdir)*5, camy+Math.sin(camdir)*5, camz, color, scale,scale)
 	);
 }
 updateall();
 setInterval(function(){
 	updateall();
 }, 100)
-
+color = '#';
+for(drawx = 0; drawx < 5; drawx += 0.5){
+	for(drawy = 0; drawy < 5; drawy += 0.5){
+		color = '#';
+		for (i = 0; i < 6; i++) {
+		  color += "0123456789ABCDEF"[Math.floor(Math.random() * 16)];
+		}
+		color = `rgb(${drawy*20+70},${drawy*20+70},${drawy*20+70})`;
+		objects.push(
+			new Player(drawx, drawy, camz, color, 1, 1)
+		);
+	}	
+}
+camx = 0;
+camy = 0;
 </script>
